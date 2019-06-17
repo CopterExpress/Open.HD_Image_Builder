@@ -10,7 +10,7 @@ if __name__ == '__main__':
     tag = os.sys.argv[2]
     file = os.sys.argv[3]
     gh = Github(API_KEY)
-    repo = gh.get_user().get_repo(repo)
+    repo = gh.get_user("CopterExpress").get_repo(repo)
     release = repo.create_git_release(tag=tag, name=tag, message='Build {}'.format(tag))
     print('Uploading build artifacts')
     release.upload_asset(path=file, content_type='application/octet-stream')
