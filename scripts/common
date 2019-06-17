@@ -56,6 +56,12 @@ unmount_image(){
 export -f unmount_image
 
 on_chroot() {
+	if [ ! -f "/proc/sys/fs/binfmt_misc/arm" ]; then
+		REGISTER=':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:'
+		mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc || true
+		echo ${REGISTER} > /proc/sys/fs/binfmt_misc/register || true
+	fi
+
 	MNT_DIR="${STAGE_WORK_DIR}/mnt"
 
 	if ! mount | grep -q "${MNT_DIR}/proc)"; then

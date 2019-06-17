@@ -1,0 +1,71 @@
+sudo: required
+language: generic
+services:
+  - docker
+env:
+  global:
+    - DOCKER="sfalexrog/openhd-builder:latest"
+git:
+  depth: 50
+jobs:
+  include:
+    - stage: Kernel
+      name: "Build patched kernel"
+      before_script:
+        - docker pull ${DOCKER}
+# Hack: put SKIP-files in all directories after kernel build
+        - touch stages/03-Packages/SKIP
+        - touch stages/04-Wifibroadcast/SKIP
+      script:
+        - .ci/check_stage1.sh
+        - if [[ "$(find . -maxdepth 1 -name 'kernel_*.img.xz' | wc -l)" -eq "0" ]]; then
+            docker run --privileged --rm -v /dev:/dev -v $(pwd):/root ${DOCKER} /bin/bash -c 'cd /root; ./buildwithlog.sh';
+          fi
+      after_script:
+        - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        - git fetch --unshallow
+        - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel)
+        # FIXME: this does not work for deployments
+        # - find deploy/ -name "*.img" -exec mv {} deploy/kernel_${KERNEL_VERSION}.img +
+        - sudo mv work/02-Kernel/IMAGE.img kernel_${KERNEL_VERSION}.img
+        - sudo chmod a+rw kernel_${KERNEL_VERSION}.img
+        - docker run --rm -v $(pwd):/root ${DOCKER} xz -v -z /root/kernel_${KERNEL_VERSION}.img
+        - .ci/upload_stage1.sh
+    - stage: Userspace
+      name: "Add userspace stuff"
+      before_script:
+        - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+        - git fetch --unshallow
+        - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel)
+        - .ci/check_stage2.sh
+        - if [[ "$(find . -maxdepth 1 -name 'kernel_*.img.xz' | wc -l)" -ne "0" ]]; then
+            docker pull ${DOCKER};
+          fi
+# Hack: don't build kernel (TODO: fetch image with kernel)
+        - touch stages/00-Prerequisites/SKIP
+        - touch stages/01-Baseimage/SKIP
+        - touch stages/02-Kernel/SKIP
+      script:
+        - if [[ "$(find . -maxdepth 1 -name 'kernel_*.img.xz' | wc -l)" -ne "0" ]]; then
+            docker run --rm -v $(pwd):/root ${DOCKER} xz -v -d /root/kernel_${KERNEL_VERSION}.img.xz;
+            chmod a+rw kernel_${KERNEL_VERSION}.img;
+            mkdir -p work/02-Kernel;
+            sudo mv kernel_${KERNEL_VERSION}.img work/02-Kernel/IMAGE.img;
+            docker run --privileged --rm -v /dev:/dev -v $(pwd):/root ${DOCKER} /bin/bash -c 'cd /root; ./buildwithlog.sh';
+          else
+            echo "No base image; kernel stage probably failed";
+            exit 1;
+          fi
+      before_deploy:
+        - sudo find deploy/ -name "*.img" -exec mv {} deploy/openhd.img \;
+        - sudo chmod -R a+rw deploy
+        - zip deploy/openhd.img.zip deploy/openhd.img
+      deploy:
+        provider: releases
+        api_key: ${GITHUB_OAUTH_TOKEN}
+        file: deploy/openhd.img.zip
+        skip_cleanup: true
+        on:
+          tags: true
+        draft: true
+        name: ${TRAVIS_TAG}

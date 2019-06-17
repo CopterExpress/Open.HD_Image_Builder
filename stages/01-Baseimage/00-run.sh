@@ -6,7 +6,7 @@ rm *.zip
 rm *.img
 
 log "Download Raspbian base Image"
-wget $BASE_IMAGE_URL/$BASE_IMAGE".zip"
+wget --progress=dot:giga $BASE_IMAGE_URL/$BASE_IMAGE".zip"
 
 log "Unzip"
 unzip $BASE_IMAGE".zip"
