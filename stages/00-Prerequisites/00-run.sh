@@ -8,3 +8,5 @@ if [ ! -d ~/tools ]; then
     source ~/.bashrc
 fi
 
+DEBIAN_FRONTEND=noninteractive apt-get -yq update
+DEBIAN_FRONTEND=noninteractive apt-get -yq install flex bison libssl-dev

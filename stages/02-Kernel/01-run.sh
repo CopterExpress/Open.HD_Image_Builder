@@ -28,10 +28,10 @@ cp -a v4l2loopback/. linux/drivers/media/v4l2loopback/
 log "Patch the Kernel"
 pushd linux
 
-for PATCH_FILE in "${STAGE_DIR}/PATCHES/"*; do
-    log "Applying patch ${PATCH_FILE}"
-    patch -N -p0 < $PATCH_FILE
-done
+#for PATCH_FILE in "${STAGE_DIR}/PATCHES/"*; do
+#    log "Applying patch ${PATCH_FILE}"
+#    patch -N -p0 < $PATCH_FILE
+#done
 
 # out of linux 
 popd
