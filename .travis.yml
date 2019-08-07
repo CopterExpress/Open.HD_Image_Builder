@@ -35,7 +35,8 @@ jobs:
       name: "Add userspace stuff"
       before_script:
         - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
-        - git fetch --unshallow
+        # Ignore unshallowing errors
+        - git fetch --unshallow || true
         - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel)
         - .ci/check_stage2.sh
         - if [[ "$(find . -maxdepth 1 -name 'kernel_*.img.xz' | wc -l)" -ne "0" ]]; then
