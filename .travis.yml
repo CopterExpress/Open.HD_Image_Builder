@@ -24,7 +24,7 @@ jobs:
       after_script:
         - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
         - git fetch --unshallow
-        - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel)
+        - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel config)
         # FIXME: this does not work for deployments
         # - find deploy/ -name "*.img" -exec mv {} deploy/kernel_${KERNEL_VERSION}.img +
         - sudo mv work/02-Kernel/IMAGE.img kernel_${KERNEL_VERSION}.img
@@ -39,7 +39,7 @@ jobs:
         - git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
         # Ignore unshallowing errors
         - git fetch --unshallow || true
-        - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel)
+        - export KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel config)
         - .ci/check_stage2.sh
         - if [[ "$(find . -maxdepth 1 -name 'kernel_*.img.xz' | wc -l)" -ne "0" ]]; then
             docker pull ${DOCKER};

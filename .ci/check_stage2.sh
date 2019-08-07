@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 KERNELCACHE_REPO="https://github.com/CopterExpress/openhd_kernels"
 KERNELCACHE_DIR=$(pwd)/openhd_kernels
-KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel)
+KERNEL_VERSION=$(git log --format=%h -1 stages/00-Prerequisites stages/01-Baseimage stages/02-Kernel config)
 KERNEL_FILE=kernel_${KERNEL_VERSION}.img.xz
 KERNEL_STAMP_FILE=stamp_${KERNEL_VERSION}
 
