@@ -19,8 +19,10 @@ if [[ -z $(find ${KERNELCACHE_DIR} -name ${KERNEL_STAMP_FILE}  ) ]]; then
 else
     echo "Stamp file in repo, checking for release"
     sudo apt-get update
-    sudo apt-get -y install wget
-    wget --progress=dot:giga -O "${KERNEL_FILE}" "${KERNELCACHE_REPO}/releases/download/${KERNEL_STAMP_FILE}/${KERNEL_FILE}"
+    sudo apt-get -y install wget curl
+    # wget used to produce empty files on failure; use curl instead
+    #wget --progress=dot:giga -O "${KERNEL_FILE}" "${KERNELCACHE_REPO}/releases/download/${KERNEL_STAMP_FILE}/${KERNEL_FILE}"
+    curl --fail --location "${KERNELCACHE_REPO}/releases/download/${KERNEL_STAMP_FILE}/${KERNEL_FILE}" -o "${KERNEL_FILE}"
     if [[ -f "${KERNEL_FILE}" ]]; then
         echo "Kernel already built, skipping build"
         export SKIP_BUILD=1
