@@ -29,7 +29,9 @@ jobs:
         # - find deploy/ -name "*.img" -exec mv {} deploy/kernel_${KERNEL_VERSION}.img +
         - sudo mv work/02-Kernel/IMAGE.img kernel_${KERNEL_VERSION}.img
         - sudo chmod a+rw kernel_${KERNEL_VERSION}.img
-        - docker run --rm -v $(pwd):/root ${DOCKER} xz -v -z /root/kernel_${KERNEL_VERSION}.img
+        # xz is taking way too much time to compress the kernel and is silent about that,
+        # so we need something chatty to run in the background
+        - travis_wait docker run --rm -v $(pwd):/root ${DOCKER} xz -v -z /root/kernel_${KERNEL_VERSION}.img
         - .ci/upload_stage1.sh
     - stage: Userspace
       name: "Add userspace stuff"
